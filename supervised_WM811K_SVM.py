@@ -1,13 +1,3 @@
-'''-------------------------------------------------------------------------
-This file is part of Semi-CL-WMPD, a Python library for wafer map pattern
-detection using semi-supervised constrastive learning with domain-specific
-transformation.
-
-Copyright (C) 2020-2021 Hanbin Hu <hanbinhu@ucsb.edu>
-                        Peng Li <lip@ucsb.edu>
-              University of California, Santa Barbara
--------------------------------------------------------------------------'''
-
 from typing import Tuple, Dict
 import logging
 import hydra
@@ -36,7 +26,7 @@ from sklearn.utils.fixes import delayed
 from joblib import Parallel
 
 from utils import SummaryWriter, hydra_run_wrapper, compute_perf, write_log
-from datasets import setup_SVM_dataframes
+from datasets.datasets import setup_SVM_dataframes
 
 logger = logging.getLogger(__name__)
 

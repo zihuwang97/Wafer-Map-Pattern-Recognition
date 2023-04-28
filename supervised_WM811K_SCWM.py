@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader
 
 from utils import SummaryWriter, hydra_run_wrapper, compute_perf, init_weights,\
                   write_tensorboard, write_log, write_learning_rate_log
-from datasets import setup_SCL_dataloaders
+from datasets.datasets import setup_scwm_dataloaders
 from transform import get_transform
 from models import WM811K_Encoder, WM811K_Projection_Head, WM811K_Supervised_Head
 from early_stopping import EarlyStopping
@@ -35,7 +35,7 @@ def acc_per_class(pred, target, num_classes=9):
 
     return acc, pred_5, pred_7
 
-def scl_loss(z, target, temp=0.7):
+def scwm_loss(z, target, temp=0.7):
     # calculate scores
     scores = z @ z.t()
     scores = scores / temp
@@ -59,7 +59,7 @@ def scl_loss(z, target, temp=0.7):
     loss = - torch.sum(log_logits / pos_count)
     return loss
 
-def run_one_epoch_scl(encoder: nn.Module,
+def run_one_epoch_scwm(encoder: nn.Module,
                             proj_head: nn.Module,
                             dataloader: DataLoader,
                             optimizer: optim.Optimizer,
@@ -75,11 +75,11 @@ def run_one_epoch_scl(encoder: nn.Module,
         reps = proj_head(encoder(wm))
         reps = torch.nn.functional.normalize(reps, dim=-1)
         target = torch.cat((target, target))
-        loss = scl_loss(reps, target)
+        loss = scwm_loss(reps, target)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        loop.set_description("SCL Finetune Epoch [{}/{}]".format(epoch, num_epochs))
+        loop.set_description("scwm Finetune Epoch [{}/{}]".format(epoch, num_epochs))
         loop.set_postfix(loss=loss.item())
 
 def run_one_epoch(model: nn.Module,
@@ -121,8 +121,8 @@ def train(encoder: nn.Module,
                        encoder=encoder, proj_head=proj_head, lin_classifier=lin_classifier)
     write_learning_rate_log(writer, optimizer, 0)
     for epoch in range(1,cfg.epochs+1):
-        # SCL for learning representations
-        run_one_epoch_scl(encoder, proj_head, dataloaders["Train"], optimizer, epoch, cfg.epochs)
+        # scwm for learning representations
+        run_one_epoch_scwm(encoder, proj_head, dataloaders["Train"], optimizer, epoch, cfg.epochs)
         # Supervised training of a classifier above the frozen encoder
         train_classifier(encoder, lin_classifier, dataloaders['finetune'], cfg.finetune)
         train_perf, test_perf = evaluate_perf(
@@ -239,7 +239,7 @@ def evaluation(encoder: nn.Module,
 
 def main(writer: SummaryWriter, cfg: DictConfig) -> None:
     train_transform, finetune_transform, test_transform = get_transform(cfg.transform)
-    dataloaders = setup_SCL_dataloaders(cfg.dataset, train_transform, test_transform, finetune_transform)
+    dataloaders = setup_scwm_dataloaders(cfg.dataset, train_transform, test_transform, finetune_transform)
     logger.info('WM811K data loaded.')
 
     encoder = WM811K_Encoder(cfg.model)
@@ -250,7 +250,7 @@ def main(writer: SummaryWriter, cfg: DictConfig) -> None:
     lin_classifier.cuda()
     train(encoder, proj_head, lin_classifier, dataloaders, writer, cfg.training)
 
-@hydra.main(config_path='config', config_name='config_scl')
+@hydra.main(config_path='config', config_name='config_scwm')
 def run_program(cfg: DictConfig) -> None:
     hydra_run_wrapper(main, cfg, logger)
 if __name__ == '__main__':
