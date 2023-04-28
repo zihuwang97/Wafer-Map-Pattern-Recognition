@@ -1,13 +1,3 @@
-'''-------------------------------------------------------------------------
-This file is part of Semi-CL-WMPD, a Python library for wafer map pattern
-detection using semi-supervised constrastive learning with domain-specific
-transformation.
-
-Copyright (C) 2020-2021 Hanbin Hu <hanbinhu@ucsb.edu>
-                        Peng Li <lip@ucsb.edu>
-              University of California, Santa Barbara
--------------------------------------------------------------------------'''
-
 from typing import Tuple, Dict
 import logging
 from tqdm import tqdm
@@ -255,7 +245,6 @@ def main(writer: SummaryWriter, cfg: DictConfig) -> None:
     encoder = WM811K_Encoder(cfg.model)
     proj_head = WM811K_Projection_Head(cfg.model)
     lin_classifier = WM811K_Supervised_Head(cfg.model)
-    # writer.add_graph(model, torch.rand(1,1,cfg.model.input_size,cfg.model.input_size))
     encoder.cuda()
     proj_head.cuda()
     lin_classifier.cuda()
