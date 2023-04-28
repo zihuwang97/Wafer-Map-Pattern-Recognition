@@ -1,0 +1,41 @@
+# @package _group_
+#---------------------------------------------------------------------------
+# This file is part of Semi-CL-WMPD, a Python library for wafer map pattern
+# detection using semi-supervised constrastive learning with domain-specific
+# transformation.
+#
+# Copyright (C) 2020-2021 Hanbin Hu <hanbinhu@ucsb.edu>
+#                         Peng Li <lip@ucsb.edu>
+#               University of California, Santa Barbara
+#----------------------------------------------------------------------------
+run:
+  dir: runs
+
+output_subdir: .hydraConfig_${general.logname}
+
+job_logging:
+  version: 1
+  formatters:
+    simple:
+      format: '[%(asctime)s][%(name)s][%(levelname)s] - %(message)s'
+    colorlog:
+      '()': 'colorlog.ColoredFormatter'
+      format: '[%(cyan)s%(asctime)s%(reset)s][%(blue)s%(name)s%(reset)s][%(log_color)s%(levelname)s%(reset)s] - %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: colorlog
+      stream: ext://sys.stdout
+      level: INFO
+    file:
+      class: logging.FileHandler
+      mode: w
+      formatter: simple
+      level: DEBUG
+      filename: ${general.logname}.log
+      delay: true
+  root:
+    level: DEBUG
+    handlers: [console, file]
+
+  disable_existing_loggers: false

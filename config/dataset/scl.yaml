@@ -1,0 +1,21 @@
+# @package _group_
+#----------------------------------------------------------------------------
+# This file is part of Semi-CL-WMPD, a Python library for wafer map pattern
+# detection using semi-supervised constrastive learning with domain-specific
+# transformation.
+#
+# Copyright (C) 2020-2021 Hanbin Hu <hanbinhu@ucsb.edu>
+#                         Peng Li <lip@ucsb.edu>
+#               University of California, Santa Barbara
+#----------------------------------------------------------------------------
+train:
+  data: ./data/train.pkl
+  batch_size: 256
+  weight_sampler:
+    enabled: True
+
+test:
+  data: ./data/test.pkl
+  batch_size: 128
+
+workers: 8
